@@ -6,7 +6,6 @@ on:
 
 permissions:
   contents: write
-  actions: write
 
 jobs:
   unpack:
@@ -17,8 +16,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tar -xzf echomind-source.tar.gz
-          git rm -q .github/workflows/bootstrap.yml echomind-source.tar.gz
+          tar -xzf echomind-source.tar.gz --exclude='./.github'
+          git rm -q echomind-source.tar.gz
           git add -A
           git -c user.name="${{ github.actor }}" \
               -c user.email="${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com" \
@@ -29,5 +28,3 @@ jobs:
           Claude-Session: https://claude.ai/code/session_01CEYmjj3fg6ixAKwVhzoehG
           MSG
           git push
-          gh workflow run deploy-frontend.yml --ref main
-          gh workflow run backend-ci.yml --ref main
