@@ -1,0 +1,33 @@
+name: Bootstrap repository (one-time)
+
+on:
+  push:
+    paths: ['.github/workflows/bootstrap.yml']
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unpack project source and commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tar -xzf echomind-source.tar.gz
+          git rm -q .github/workflows/bootstrap.yml echomind-source.tar.gz
+          git add -A
+          git -c user.name="${{ github.actor }}" \
+              -c user.email="${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com" \
+              commit -q -F - <<'MSG'
+          Add EchoMind AI: Angular frontend, Spring Boot API, MySQL scripts and docs
+
+          Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+          Claude-Session: https://claude.ai/code/session_01CEYmjj3fg6ixAKwVhzoehG
+          MSG
+          git push
+          gh workflow run deploy-frontend.yml --ref main
+          gh workflow run backend-ci.yml --ref main
